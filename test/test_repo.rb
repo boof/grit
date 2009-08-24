@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/helper'
 
 class TestRepo < Test::Unit::TestCase
   def setup
-    @r = Repo.new(GRIT_REPO)
+    @r = Repo.new(GRIT_REPO, :work_tree => true)
   end
 
   def create_temp_repo(clone_path)
