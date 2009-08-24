@@ -54,7 +54,10 @@ class TestRepo < Test::Unit::TestCase
   # descriptions
 
   def test_description
-    assert_equal "Unnamed repository; edit this file to name it for gitweb.", @r.description
+    expect = File.read File.join(GRIT_REPO, '.git', 'description')
+    expect.chomp!
+
+    assert_equal expect, @r.description
   end
 
   # refs
