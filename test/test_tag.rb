@@ -9,42 +9,36 @@ class TestTag < Test::Unit::TestCase
   # create
 
   def test_create_tag
-    @r.add_tag 'test_without_slash'
-    tag = @r.tags.find { |t| t.name == 'test_without_slash' }
-    @r.git.tag({:d => true}, 'test_without_slash')
-    assert_equal @r.branch('master').commit, tag.commit
-  end
-
-  def test_create_tag_with_slash
     @r.add_tag 'test/with_slash'
     tag = @r.tags.find { |t| t.name == 'test/with_slash' }
     @r.git.tag({:d => true}, 'test/with_slash')
     assert_instance_of Grit::Tag, tag
   end
+  def test_create_tag_from_default
+    tag = @r.add_tag 'test_from_default'
+    @r.git.tag({:d => true}, 'test_from_default')
+    assert_equal @r.branch('master').commit, tag.commit
+  end
+
+  def assert_tag_created_from(tag_name, nonpack_startpoint)
+    tag = @r.add_tag tag_name, nonpack_startpoint
+    @r.git.tag({:d => true}, tag_name) # clean up
+
+    assert_equal @r.branch('nonpack').commit, tag.commit,
+        "expected #{ tag_name } to start from #{ nonpack_startpoint }"
+  end
 
   def test_create_tag_from_ref
-    tag_from_ref = @r.add_tag 'test_from_ref',
-        @r.branch('nonpack')
-    @r.git.tag({:d => true}, 'test_from_ref')
-    assert_equal @r.branch('nonpack').commit, tag_from_ref.commit
+    assert_tag_created_from 'test_from_ref', @r.branch('nonpack')
   end
   def test_create_tag_from_commit
-    tag_from_commit = @r.add_tag 'test_from_commit',
-        @r.branch('nonpack').commit
-    @r.git.tag({:d => true}, 'test_from_commit')
-    assert_equal @r.branch('nonpack').commit, tag_from_commit.commit
+    assert_tag_created_from 'test_from_commit', @r.branch('nonpack').commit
   end
   def test_create_tag_from_string
-    tag_from_string = @r.add_tag 'test_from_string',
-        'nonpack'
-    @r.git.tag({:d => true}, 'test_from_string')
-    assert_equal @r.branch('nonpack').commit, tag_from_string.commit
+    assert_tag_created_from 'test_from_string', 'nonpack'
   end
   def test_create_tag_from_sha1
-    tag_from_sha1 = @r.add_tag 'test_from_sha1',
-        @r.branch('nonpack').commit.id
-    @r.git.tag({:d => true}, 'test_from_sha1')
-    assert_equal @r.branch('nonpack').commit, tag_from_sha1.commit
+    assert_tag_created_from 'test_from_sha1', @r.branch('nonpack').commit.id
   end
 
   # list_from_string size
