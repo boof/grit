@@ -11,15 +11,6 @@ module Grit
     # The git command line interface object
     attr_accessor :git
     
-    # Create a new Repo instance
-    #   +path+ is the path to either the root git directory or the bare git repo
-    #   +options+ :is_bare force to load a bare repo
-    #
-    # Examples
-    #   g = Repo.new("/Users/tom/dev/grit")
-    #   g = Repo.new("/Users/tom/public/grit.git")
-    #
-    # Returns Grit::Repo
     def initialize(work_tree, git_dir, options)
       @bare = work_tree == git_dir
       @working_dir, @path = work_tree, git_dir
@@ -35,9 +26,19 @@ module Grit
       end
     end
 
+    # Creates new repository if it does not exist and returns it.
     def self.init(path, options = {})
       new path, options.merge(:init => true)
     end
+    # Create a new Repo instance
+    #   +path+ is the path to either the root git directory or the bare git repo
+    #   +options+ :is_bare force to load a bare repo
+    #
+    # Examples
+    #   g = Repo.new("/Users/tom/dev/grit")
+    #   g = Repo.new("/Users/tom/public/grit.git")
+    #
+    # Returns Grit::Repo
     def self.new(path, options = {})
       work_tree = File.expand_path path
       git_dir = if options[:is_bare] or work_tree[/\.git$/]
@@ -61,9 +62,13 @@ module Grit
     end
 
     
+    # Create tag with <tt>name</tt> from <tt>startpoint</tt> if it does not
+    # exist. The default <tt>startpoint</tt> is the current HEAD.
     def add_tag(name, startpoint = nil)
       Tag.create self, name, startpoint
     end
+    # Returns branch with <tt>name</tt>. This will be created if it does not
+    # exist. The default <tt>startpoint</tt> is the current HEAD.
     def branch(name, startpoint = nil)
       head = get_head(name) || Head.create(self, name, startpoint)
     end
@@ -71,16 +76,18 @@ module Grit
     # An array of Head objects representing the branch heads in
     # this repo
     #
-    # Returns Grit::Head[] (baked)
+    # Returns array of Grit::Head[] (baked)
     def heads
       Head.find_all(self)
     end
     alias_method :branches, :heads
 
+    # Searches heads for <tt>head_name</tt> and returns the result.
     def get_head(head_name)
       heads.find { |h| h.name == head_name }
     end
     
+    # Check if head with <tt>head_name</tt> exists.
     def is_head?(head_name)
       get_head(head_name)
     end
