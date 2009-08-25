@@ -20,33 +20,35 @@ module Grit
     #   g = Repo.new("/Users/tom/public/grit.git")
     #
     # Returns Grit::Repo
-    def initialize(path, options = {})
-      epath = File.expand_path(path)
-      
-      if File.exist?(File.join(epath, '.git'))
-        self.working_dir = epath
-        self.path = File.join(epath, '.git')
-        @bare = false
-      elsif File.exist?(epath) && (epath =~ /\.git$/ || options[:is_bare])
-        self.path = epath
-        @bare = true
-      elsif File.exist?(epath)
-        raise InvalidGitRepositoryError.new(epath)
-      else
-        raise NoSuchPathError.new(epath)
-      end
+    def initialize(work_tree, git_dir, options)
+      @bare = work_tree == git_dir
+      @working_dir, @path = work_tree, git_dir
+      @git = Git.new @path, @working_dir
 
-      self.git = Git.new(self.path, self.working_dir || self.path)
+      if options[:init]
+        Dir.mkdir @working_dir unless File.exist? @working_dir
+        # this could possibly more simple if mocha wouldn't mess with...
+        git.run '', :init, '', {}, [] unless File.exist? @path
+      else
+        raise NoSuchPathError unless File.exist? @working_dir
+        raise InvalidGitRepositoryError unless File.exist? @path
+      end
     end
-   
-    # Does nothing yet...
-    def self.init(path)
-      # !! TODO !!
-      # create directory
-      # generate initial git directory
-      # create new Grit::Repo on that dir, return it
+
+    def self.init(path, options = {})
+      new path, options.merge(:init => true)
     end
-    
+    def self.new(path, options = {})
+      work_tree = File.expand_path path
+      git_dir = if options[:is_bare] or work_tree[/\.git$/]
+            work_tree
+          else
+            File.join work_tree, '.git'
+          end
+
+      super work_tree, git_dir, options
+    end
+
     # The project's description. Taken verbatim from GIT_REPO/description
     #
     # Returns String
@@ -59,6 +61,13 @@ module Grit
     end
 
     
+    def add_tag(name, startpoint = nil)
+      Tag.create self, name, startpoint
+    end
+    def branch(name, startpoint = nil)
+      head = get_head(name) || Head.create(self, name, startpoint)
+    end
+
     # An array of Head objects representing the branch heads in
     # this repo
     #
@@ -66,7 +75,6 @@ module Grit
     def heads
       Head.find_all(self)
     end
-    
     alias_method :branches, :heads
 
     def get_head(head_name)

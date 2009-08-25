@@ -35,7 +35,7 @@ module Grit
       self.git_dir, self.work_tree = git_dir, work_tree
       self.bytes_read = 0
     end
-    
+
     def shell_escape(str)
       str.to_s.gsub("'", "\\\\'").gsub(";", '\\;')
     end
@@ -62,8 +62,8 @@ module Grit
       opt_args = transform_options(options)
       ext_args = args.reject { |a| a.empty? }.map { |a| (a == '--' || a[0].chr == '|') ? a : "'#{e(a)}'" }
 
-      work_tree_option = "--work-tree='#{self.work_tree}'" if self.work_tree
-      call = "#{prefix}#{Git.git_binary} #{ work_tree_option } --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
+      work_tree_option = " --work-tree='#{self.work_tree}'" if self.work_tree
+      call = "#{prefix}#{Git.git_binary}#{work_tree_option} --git-dir='#{self.git_dir}' #{cmd.to_s.gsub(/_/, '-')} #{(opt_args + ext_args).join(' ')}#{e(postfix)}"
       Grit.log(call) if Grit.debug
       response, err = timeout ? sh(call) : wild_sh(call)
       Grit.log(response) if Grit.debug

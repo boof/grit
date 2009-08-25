@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/helper'
 
 class TestGit < Test::Unit::TestCase
   def setup
-    @git = Git.new(File.join(File.dirname(__FILE__), *%w[..]))
+    @git = Git.new File.join(File.dirname(__FILE__), '..', '.git')
   end
   
   def teardown
@@ -81,4 +81,14 @@ class TestGit < Test::Unit::TestCase
     @git.expects(:sh).with("#{Git.git_binary} --git-dir='#{@git.git_dir}' archive 'master' | gzip")
     @git.archive({}, "master", "| gzip")
   end
+
+  def test_it_uses_a_work_tree
+    work_tree = File.join @git.git_dir, '..'
+    @git.work_tree = File.expand_path work_tree
+
+    @git.expects(:sh).with("#{Git.git_binary} --work-tree='#{ @git.work_tree }' --git-dir='#{@git.git_dir}' foo ")
+
+    @git.foo({})
+  end
+
 end

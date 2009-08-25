@@ -37,6 +37,37 @@ class TestRepo < Test::Unit::TestCase
     FileUtils.rm_r(gpath)
   end
   
+  # init
+
+  def assert_and_cleanup_directories(work_tree, git_dir)
+    directories_exist = File.exists?(work_tree) && File.exists?(git_dir)
+    FileUtils.rm_r work_tree rescue nil
+
+    assert directories_exist,
+        "expected #{ work_tree } and #{ git_dir } to exist"
+  end
+  def assert_initialized_repository(work_tree, git_dir, options = {})
+    assert_nothing_raised do
+       assert_instance_of Grit::Repo, Repo.init(work_tree, options)
+    end
+    assert_and_cleanup_directories work_tree, git_dir
+  end
+  def test_init_creates_a_repository
+    work_tree = File.join File.dirname(__FILE__), 'tmp'
+    git_dir = File.join work_tree, '.git'
+    assert_initialized_repository work_tree, git_dir
+  end
+  def test_init_creates_a_bare_repository
+    work_tree = File.join File.dirname(__FILE__), 'tmp.git'
+    git_dir = work_tree
+    assert_initialized_repository work_tree, git_dir
+  end
+  def test_init_creates_a_bare_repository_when_forced
+    work_tree = File.join File.dirname(__FILE__), 'tmp'
+    git_dir = work_tree
+    assert_initialized_repository work_tree, git_dir, :is_bare => true
+  end
+
   # new
 
   def test_new_should_raise_on_invalid_repo_location
