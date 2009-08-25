@@ -3,15 +3,18 @@ module Grit
   class Ref
 
     class << self
-
       def create(repo, ref_name, startpoint = nil, type = nil)
         type = extract_type type
         startpoint = startpoint_from_object repo, startpoint
 
         path = File.join repo.path, %W[ refs #{ type }s #{ ref_name } ]
-        open(path, 'w') { |f| f << startpoint } unless File.exists? path
+        unless File.exists? path
+          dir = File.dirname path
+          FileUtils.mkdir_p dir unless File.exist? dir
+          open(path, 'w') { |f| f << startpoint }
+        end
 
-        new ref_name, Commit.create(repo, startpoint)
+        new ref_name, Commit.create(repo, :id => startpoint)
       end
 
       # Find all Refs
@@ -65,10 +68,8 @@ module Grit
         def startpoint_from_object(repo, object)
           case object
           when String
-            ref = Grit::Ref.find_all(repo).find {|r| r.name == object }
-            commit = ref.commit if ref
-            commit ||= nil # TODO: find commit
-            commit.id
+            ref = repo.refs.find {|r| r.name == object }
+            ref ? ref.commit.id : object
           when Grit::Ref; object.commit.id
           when Grit::Commit; object.id
           else

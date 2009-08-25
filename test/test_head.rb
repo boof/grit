@@ -4,9 +4,25 @@ class TestHead < Test::Unit::TestCase
   def setup
     @r = Repo.new(File.join(File.dirname(__FILE__), *%w[dot_git]), :is_bare => true)
   end
-  
+
+  # create
+
+  def test_create_head
+    @r.branch 'test_without_slash'
+    head = @r.heads.find { |h| h.name == 'test_without_slash' }
+    @r.git.branch({:d => true}, 'test_without_slash')
+    assert_instance_of Grit::Head, head
+  end
+
+  def test_create_head_with_slash
+    @r.branch 'test/with_slash'
+    head = @r.heads.find { |h| h.name == 'test/with_slash' }
+    @r.git.branch({:d => true}, 'test/with_slash')
+    assert_instance_of Grit::Head, head
+  end
+
   # inspect
-  
+
   def test_inspect
     head = @r.heads[1]
     assert_equal %Q{#<Grit::Head "test/master">}, head.inspect

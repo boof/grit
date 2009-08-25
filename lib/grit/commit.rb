@@ -219,6 +219,10 @@ module Grit
       "%s <%s> %s %+05d" % [author.name, author.email, authored_date.to_i, 800]
     end
 
+    def ==(other)
+      self.class === other and id == other.id
+    end
+
     def to_hash
       {
         'id'       => id,
