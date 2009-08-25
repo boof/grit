@@ -3,6 +3,13 @@ module Grit
   class Ref
 
     class << self
+      # Creates a new Ref object with <tt>name</tt> in the repository if it
+      # does not exist already. This method can only be called on Tag, Head or
+      # Remote.
+      #
+      # The <tt>startpoint</tt> defaults to HEAD.
+      #
+      # Returns kind of Ref (baked).
       def create(repo, ref_name, startpoint = nil, type = nil)
         type = extract_type type
         startpoint = startpoint_from_object repo, startpoint
@@ -96,6 +103,8 @@ module Grit
       @git = @repo.git
     end
 
+    # Checkout the current Ref unless the current repo is bare. In this case
+    # a RuntimeError is raised.
     def checkout
       # TODO: should this change the HEAD?
       raise RuntimeError, 'bare repository' if @repo.bare
@@ -144,6 +153,10 @@ module Grit
       end
     end
 
+    # Checkout the this branch, do stuff and ensure that the old branch gets
+    # checked out afterwards.
+    # If message is set the index is commited. In this case the commit (baked)
+    # is returned.
     def in_branch(message = nil)
       old_ref = @repo.head
       checkout
