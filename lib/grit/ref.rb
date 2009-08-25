@@ -92,16 +92,23 @@ module Grit
     # Returns Grit::Head (baked)
     def initialize(name, commit)
       @name, @commit = name, commit
-      @git = @commit.instance_variable_get(:@repo).git
+      @repo = @commit.instance_variable_get :@repo
+      @git = @repo.git
     end
 
     def checkout
+      # TODO: should this change the HEAD?
+      raise RuntimeError, 'bare repository' if @repo.bare
       invoke :checkout, @name
     end
 
     # Pretty object inspection
     def inspect
       %Q{#<#{self.class.name} "#{@name}">}
+    end
+
+    def ==(other)
+      self.class === other and name == other.name
     end
 
     protected
@@ -130,16 +137,22 @@ module Grit
       head.chomp!
 
       if match = /ref: refs\/heads\/(.*)/.match(head)
-        commit = Commit.create repo, repo.git.rev_parse(options, 'HEAD')
+        commit = Commit.create repo,
+            :id => repo.git.rev_parse(options, 'HEAD')
+
         new match[1], commit
       end
     end
 
-    def in_branch(message)
+    def in_branch(message = nil)
       old_ref = @repo.head
-      invoke :checkout, @name
-      yield
-      @repo.commit_index message
+      checkout
+      yield @repo
+
+      if message
+        @repo.commit_index message
+        @repo.head.commit
+      end
     ensure
       old_ref.checkout
     end

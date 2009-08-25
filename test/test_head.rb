@@ -8,17 +8,26 @@ class TestHead < Test::Unit::TestCase
   # create
 
   def test_create_head
-    @r.branch 'test_without_slash'
-    head = @r.heads.find { |h| h.name == 'test_without_slash' }
-    @r.git.branch({:d => true}, 'test_without_slash')
-    assert_instance_of Grit::Head, head
+    returned_head = @r.branch 'test/create_head'
+    found_head = @r.heads.find { |h| h.name == 'test/create_head' }
+    @r.git.branch({:d => true}, 'test/create_head')
+    assert_instance_of Grit::Head, returned_head
+    assert_equal returned_head, found_head
   end
 
-  def test_create_head_with_slash
-    @r.branch 'test/with_slash'
-    head = @r.heads.find { |h| h.name == 'test/with_slash' }
-    @r.git.branch({:d => true}, 'test/with_slash')
-    assert_instance_of Grit::Head, head
+  def test_in_branch_commits_index
+    @r = Repo.init "#{ File.join File.dirname(__FILE__), 'not_bare' }"
+
+    expect_message = 'This is a test...'
+    path = File.join @r.working_dir, 'in_branch'
+    File.open(path, 'w') { |f| f << expect_message }
+
+    commit = @r.branch('test/in_branch').
+        in_branch(expect_message) { |r| r.add path }
+
+    assert_equal expect_message, commit.message
+  ensure
+    FileUtils.rm_r @r.working_dir if File.exists? @r.working_dir
   end
 
   # inspect
