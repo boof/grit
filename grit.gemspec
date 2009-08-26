@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Tom Preston-Werner", "Scott Chacon", "Florian A\303\237mann"]
   s.date = %q{2009-08-26}
-  s.description = %q{Grit is a Ruby library for extracting information from a git repository in an object oriented manner.}
+  s.description = %q{This fork of Grit is a Ruby library for extracting from and manipulating information of a git repository in an object oriented manner.}
   s.email = %q{madbang@web.de}
   s.extra_rdoc_files = [
     "LICENSE",

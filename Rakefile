@@ -11,7 +11,7 @@ begin
     s.summary = "Grit is a Ruby library for extracting information from a git repository in an object oriented manner."
     s.email = "madbang@web.de"
     s.homepage = "http://github.com/boof/grit"
-    s.description = "Grit is a Ruby library for extracting information from a git repository in an object oriented manner."
+    s.description = "This fork of Grit is a Ruby library for extracting from and manipulating information of a git repository in an object oriented manner."
     s.authors = ["Tom Preston-Werner", "Scott Chacon", "Florian Aßmann"]
     s.files = FileList["[A-Z]*.*", "lib/**/*"]
     s.add_dependency('mime-types', '>= 1.15')
