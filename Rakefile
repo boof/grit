@@ -9,10 +9,10 @@ begin
     s.name = "grit"
     s.rubyforge_project = "grit"
     s.summary = "Grit is a Ruby library for extracting information from a git repository in an object oriented manner."
-    s.email = "tom@mojombo.com"
-    s.homepage = "http://github.com/mojombo/grit"
+    s.email = "madbang@web.de"
+    s.homepage = "http://github.com/boof/grit"
     s.description = "Grit is a Ruby library for extracting information from a git repository in an object oriented manner."
-    s.authors = ["Tom Preston-Werner", "Scott Chacon"]
+    s.authors = ["Tom Preston-Werner", "Scott Chacon", "Florian Aßmann"]
     s.files = FileList["[A-Z]*.*", "lib/**/*"]
     s.add_dependency('mime-types', '>= 1.15')
     s.add_dependency('diff-lcs', '>= 1.1.2')
